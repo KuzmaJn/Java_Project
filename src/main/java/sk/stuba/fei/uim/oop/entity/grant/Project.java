@@ -14,6 +14,7 @@ public class Project implements ProjectInterface{
     private Set<PersonInterface> participants = new HashSet<>();
     private OrganizationInterface applicant;
 
+
     @Override
     public String getProjectName() {
         return projectName;
@@ -49,7 +50,7 @@ public class Project implements ProjectInterface{
     @Override
     public int getTotalBudget() {
         int sum = 0;
-        for (int i = 0; i < PROJECT_DURATION_IN_YEARS; i++) {
+        for (int i = 0; i < (endingYear - startingYear); i++){
             sum += totalBudget[i];
         }
         return sum;

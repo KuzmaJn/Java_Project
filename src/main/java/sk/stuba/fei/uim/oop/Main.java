@@ -1,6 +1,7 @@
 package sk.stuba.fei.uim.oop;
 import sk.stuba.fei.uim.oop.entity.grant.Agency;
 import sk.stuba.fei.uim.oop.entity.grant.Project;
+import sk.stuba.fei.uim.oop.entity.organization.Organization;
 import sk.stuba.fei.uim.oop.entity.organization.University;
 import sk.stuba.fei.uim.oop.entity.people.Person;
 

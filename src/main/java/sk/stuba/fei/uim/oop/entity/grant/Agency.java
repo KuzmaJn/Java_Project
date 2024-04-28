@@ -4,7 +4,7 @@ import java.util.*;
 
 public class Agency implements AgencyInterface{
     private String name;
-    private Map<GrantInterface, Integer> grants = new HashMap<>();
+    private Map<GrantInterface, Integer> grants = new HashMap<>();  // key: grant, value: year grant was issued
 
     @Override
     public String getName() {
@@ -27,9 +27,6 @@ public class Agency implements AgencyInterface{
         return new HashSet<>(grants.keySet());
     }
 
-    /**
-     * Mak
-     */
     @Override
     public Set<GrantInterface> getGrantsIssuedInYear(int year) {
         Set<GrantInterface> grantsInYear = new HashSet<>();
