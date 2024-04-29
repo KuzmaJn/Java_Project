@@ -1,10 +1,10 @@
 package sk.stuba.fei.uim.oop.entity.grant;
 
 import sk.stuba.fei.uim.oop.entity.people.PersonInterface;
-import sk.stuba.fei.uim.oop.entity.organization.OrganizationInterface;
 import java.util.*;
 
 import static sk.stuba.fei.uim.oop.utility.Constants.MAX_EMPLOYMENT_PER_AGENCY;
+import static sk.stuba.fei.uim.oop.utility.Constants.PROJECT_DURATION_IN_YEARS;
 
 public class Grant implements GrantInterface {
     private String identifier;
@@ -12,7 +12,7 @@ public class Grant implements GrantInterface {
     private AgencyInterface agency;
     private int budget;
     private int remainingBudget;
-    private Map<ProjectInterface, Integer> registeredProjects = new HashMap<>();
+    private final LinkedHashMap<ProjectInterface, Integer> registeredProjects = new LinkedHashMap<>(); // key: project, value: project budget
     private GrantState state;
 
     @Override
@@ -97,49 +97,58 @@ public class Grant implements GrantInterface {
         state = GrantState.EVALUATING;
 
         // Evaluate employees employments in agency
-        for (ProjectInterface project : registeredProjects.keySet()) {                                  // iterating over all projects
-            boolean passed = true;                                                                      // to check if the project's participants have employments in order
+        for (ProjectInterface project : registeredProjects.keySet()) {                                      // iterating over all projects
+            boolean passed = true;                                                                          // to check if the project's participants have employments in order
 
-            for (PersonInterface participant : project.getAllParticipants()) {                           // iterating over all participants
+            for (PersonInterface participant : project.getAllParticipants()) {                              // iterating over all participants
                 int employment = 0;
-                employment += project.getApplicant().getEmploymentForEmployee(participant);             // adding possible employment to the variable
-                for (GrantInterface grant : agency.getAllGrants()) {                                     // iterating over all grants that the same agency has issued
+                employment += project.getApplicant().getEmploymentForEmployee(participant);                 // adding possible employment to the variable
+                for (GrantInterface grant : agency.getAllGrants()) {                                        // iterating over all grants that the same agency has issued
 
-                    for (ProjectInterface p : grant.getRegisteredProjects()) {                           // iterating over all projects that are registered in the grant
-                        if (p.getEndingYear() >= year && p.getTotalBudget() != 0                        // checking if the project is still running and have been funded
-                                && p.getAllParticipants().contains(participant)) {                      // checking if the participant is in the project
-                            employment += p.getApplicant().getEmploymentForEmployee(participant);       // if all yes, add the employment to the variable
-                            if (employment > MAX_EMPLOYMENT_PER_AGENCY) {                               // checking if the employment is too high
-                                passed = false;                                                         // if yes, set the flag to false
-                                break;                                                                  // and break the loop
+                    for (ProjectInterface p : grant.getRegisteredProjects()) {                              // iterating over all projects that are registered in the grant
+                        if (p.getEndingYear() >= year && p.getAllParticipants().contains(participant)
+                                && p.getTotalBudget() != 0) {                                               // checking if the participant is in the project
+                            employment += p.getApplicant().getEmploymentForEmployee(participant);           // if all yes, add the employment to the variable
+                            if (employment > MAX_EMPLOYMENT_PER_AGENCY) {                                   // checking if the employment is too high
+                                passed = false;                                                             // if yes, set the flag to false
+                                break;                                                                      // and break the loop
                             }
                         }
                     }
-                    if (!passed)
-                        break;                                                                  // if the flag is false, break the loop
+                    if (!passed) break;                                                                     // if the flag is false, break the loop
                 }
                 if (!passed) break;
             }
             if (!passed) {
-                registeredProjects.put(project, 0);                                                     // if the flag is false, set the project's budget to 0
+                registeredProjects.put(project, 0);                                                         // if the flag is false, set the project's budget to 0
             }
         }
 
         // Dividing budget between projects
+        // If there is only one project, it gets the whole budget
 
         int count = 0;
         for (ProjectInterface project : registeredProjects.keySet()) {
             if (registeredProjects.get(project) == null) count++;
         }
-        count = count / 2;
-        int budgetPerProject = budget / count;
+
+        int budgetPerProject;
+        if(count > 1) {
+            count = count / 2;
+            budgetPerProject = budget / count;
+        }
+        else {
+            budgetPerProject = budget;
+        }
+
+        //only first half of evaluated projects is funded
         for (ProjectInterface project : registeredProjects.keySet()) {
             if (registeredProjects.get(project) == null) {
                 if(remainingBudget >= budgetPerProject) {
                     registeredProjects.put(project, budgetPerProject);
                     remainingBudget -= budgetPerProject;
                 }
-                    registeredProjects.put(project, 0);
+                else registeredProjects.put(project, 0);
             }
         }
 
@@ -147,6 +156,11 @@ public class Grant implements GrantInterface {
 
     @Override
     public void closeGrant () {
-
+        for(ProjectInterface project : registeredProjects.keySet()) {
+           for(int i = 0; i < PROJECT_DURATION_IN_YEARS; i++) {
+               project.setBudgetForYear(year + i, registeredProjects.get(project) / PROJECT_DURATION_IN_YEARS);
+           }
+        }
+        state = GrantState.CLOSED;
     }
 }

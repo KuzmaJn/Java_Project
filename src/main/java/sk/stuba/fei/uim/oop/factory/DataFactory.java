@@ -1,15 +1,10 @@
 package sk.stuba.fei.uim.oop.factory;
 
 import sk.stuba.fei.uim.oop.entity.grant.*;
-import sk.stuba.fei.uim.oop.entity.grant.AgencyInterface;
-import sk.stuba.fei.uim.oop.entity.grant.GrantInterface;
-import sk.stuba.fei.uim.oop.entity.grant.ProjectInterface;
-import sk.stuba.fei.uim.oop.entity.organization.OrganizationInterface;
 import sk.stuba.fei.uim.oop.entity.organization.*;
-import sk.stuba.fei.uim.oop.entity.people.Person;
-import sk.stuba.fei.uim.oop.entity.people.PersonInterface;
+import sk.stuba.fei.uim.oop.entity.people.*;
 
-import java.util.LinkedList;
+import java.util.*;
 
 public class DataFactory {
 

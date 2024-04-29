@@ -10,8 +10,8 @@ public class Project implements ProjectInterface{
     private String projectName;
     private int startingYear;
     private int endingYear;
-    private int []totalBudget;
-    private Set<PersonInterface> participants = new HashSet<>();
+    private int []budgetsPerYear = new int [PROJECT_DURATION_IN_YEARS];
+    private final Set<PersonInterface> participants = new HashSet<>();
     private OrganizationInterface applicant;
 
 
@@ -31,7 +31,7 @@ public class Project implements ProjectInterface{
     @Override
     public void setStartingYear(int year) {
         this.startingYear = year;
-        this.endingYear = year + PROJECT_DURATION_IN_YEARS;
+        this.endingYear = year + PROJECT_DURATION_IN_YEARS - 1;
     }
     @Override
     public int getEndingYear() {
@@ -40,27 +40,28 @@ public class Project implements ProjectInterface{
 
     @Override
     public int getBudgetForYear(int year) {
-        return totalBudget[year - getStartingYear()];
+        return budgetsPerYear[year - getStartingYear()];
     }
     @Override
     public void setBudgetForYear(int year, int budget) {
-        totalBudget[year - getStartingYear()] = budget;
+        budgetsPerYear[year - getStartingYear()] = budget;
+        applicant.projectBudgetUpdateNotification(this, year, budget);
     }
 
     @Override
     public int getTotalBudget() {
+        if(budgetsPerYear == null){
+            return 0;
+        }
         int sum = 0;
-        for (int i = 0; i < (endingYear - startingYear); i++){
-            sum += totalBudget[i];
+        for (int i = 0; i < (endingYear - startingYear + 1); i++){
+            sum += budgetsPerYear[i];
         }
         return sum;
     }
 
     @Override
     public void addParticipant(PersonInterface participant) {
-        if(participant == null){
-            throw new IllegalArgumentException("Participant cannot be null.");
-        }
         if (participant.getEmployers().contains(applicant)){
             participants.add(participant);
         }

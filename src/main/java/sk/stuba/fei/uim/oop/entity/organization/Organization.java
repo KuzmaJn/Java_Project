@@ -3,15 +3,12 @@ package sk.stuba.fei.uim.oop.entity.organization;
 import sk.stuba.fei.uim.oop.entity.grant.ProjectInterface;
 import sk.stuba.fei.uim.oop.entity.people.PersonInterface;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Organization implements OrganizationInterface{
     private String name;
-    private Map<PersonInterface, Integer> employees = new HashMap<>(); // key: employee, value: employment
-    private Set<ProjectInterface> projects = new HashSet<>();
+    private final Map<PersonInterface, Integer> employees = new HashMap<>(); // key: employee, value: employment
+    private final Map<ProjectInterface, Integer> projects = new HashMap<>(); // key: project, value: budget funded by organization (only in company, in university 0)
 
     @Override
     public String getName() {
@@ -25,9 +22,6 @@ public class Organization implements OrganizationInterface{
 
     @Override
     public void addEmployee(PersonInterface p, int employment) {
-        if(p == null || employment < 0) {
-            throw new IllegalArgumentException("Person or employment cannot be null.");
-        }
         employees.put(p, employment);
     }
 
@@ -43,13 +37,13 @@ public class Organization implements OrganizationInterface{
 
     @Override
     public Set<ProjectInterface> getAllProjects() {
-        return projects;
+        return new HashSet<>(projects.keySet());        // creates a new set with the key values of the map
     }
 
     @Override
     public Set<ProjectInterface> getRunningProjects(int year) {
         Set<ProjectInterface> runningProjects = new HashSet<>();
-        for(ProjectInterface project : projects) {
+        for(ProjectInterface project : projects.keySet()) {
             if (project.getEndingYear() <= year) {
                 runningProjects.add(project);
             }
@@ -59,24 +53,29 @@ public class Organization implements OrganizationInterface{
 
     @Override
     public void registerProjectInOrganization(ProjectInterface project) {
-        if(project == null) {
-            throw new IllegalArgumentException("Project cannot be null.");
-        }
-        projects.add(project);
+        projects.put(project, 0);
     }
+
+    public void addBudgetToProject(ProjectInterface project, int budget) {
+        projects.put(project, projects.get(project) + budget);
+    }
+
+    /**
+     * @return total budget assigned to project with grant and organization funds
+     */
 
     @Override
     public int getProjectBudget(ProjectInterface pi) {
-        if(pi == null) {
-            throw new IllegalArgumentException("Project cannot be null.");
+        if(!projects.containsKey(pi)) {
+            return 0;
         }
-        return pi.getTotalBudget();
+        return pi.getTotalBudget() + projects.get(pi);
     }
 
     @Override
     public int getBudgetForAllProjects() {
         int sum = 0;
-        for (ProjectInterface project : projects) {
+        for (ProjectInterface project : projects.keySet()){
             sum += getProjectBudget(project);
         }
         return sum;

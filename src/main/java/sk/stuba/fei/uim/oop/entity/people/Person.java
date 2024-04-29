@@ -7,7 +7,7 @@ import java.util.*;
 public class Person implements PersonInterface {
     private String name;
     private String address;
-    private Set<OrganizationInterface> employers = new HashSet<>();
+    private final Set<OrganizationInterface> employers = new HashSet<>();
 
     @Override
     public String getName() {
@@ -29,9 +29,6 @@ public class Person implements PersonInterface {
 
     @Override
     public void addEmployer(OrganizationInterface organization) {
-        if (organization == null) {
-            throw new IllegalArgumentException("Employer cannot be null");
-        }
         employers.add(organization);
     }
 
